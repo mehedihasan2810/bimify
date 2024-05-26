@@ -1,4 +1,3 @@
-# .github/workflows/main.yml
 name: CICD
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -47,41 +46,60 @@ jobs:
   #     - name: Run tests
   #       run: npm test
 
-  build:
+  # build:
+  #   runs-on: ubuntu-latest
+  #   needs: lint
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: "20.x"
+
+  #     - name: Install dependencies
+  #       run: npm install
+
+  #     - name: Build project
+  #       run: npm run build
+
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: lint
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: "20.x"
+
+  #     - name: Install dependencies
+  #       run: npm install
+
+  #     - name: Build project
+  #       run: npm run build
+
+  #     - name: Deploy to Vercel
+  #       run: vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+
+  Deploy-Production:
     runs-on: ubuntu-latest
     needs: lint
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "20.x"
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
 
-      - name: Install dependencies
-        run: npm install
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build project
-        run: npm run build
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "20.x"
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build project
-        run: npm run build
-
-      - name: Deploy to Vercel
-        run: vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
