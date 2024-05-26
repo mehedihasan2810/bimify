@@ -1,12 +1,10 @@
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
 import React, { Suspense } from "react";
 // import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
-// @ts-expect-error: stupid ts error
 console.log(process.env.NODE_ENV);
 
 const TanStackRouterDevtools =
-  // @ts-expect-error: stupid ts error
   process.env.NODE_ENV === "production"
     ? () => null // Render nothing in production
     : React.lazy(() =>
@@ -21,15 +19,15 @@ const TanStackRouterDevtools =
 export const Route = createRootRoute({
   component: () => (
     <>
-      <div className="p-2 flex gap-2">
+      {/* <div className="p-2 flex gap-2">
         <Link to="/" className="[&.active]:font-bold">
           Home
         </Link>{" "}
         <Link to="/about" className="[&.active]:font-bold">
           About
         </Link>
-      </div>
-      <hr />
+      </div> */}
+      {/* <hr /> */}
       <Outlet />
       {/* <TanStackRouterDevtools /> */}
       <Suspense>
