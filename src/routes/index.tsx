@@ -13,19 +13,19 @@ function Index() {
   useEffect(() => {
     const container = document.getElementById("container")!;
 
-    const components = new OBC.Components();
+    let components = new OBC.Components();
 
     // set up the world ( A world represents a 3D environment in your application. It consists of a scene, a camera and (optionally) a renderer )
-    const worlds = components.get(OBC.Worlds);
-    const world = worlds.create<
+    let worlds = components.get(OBC.Worlds);
+    let world = worlds.create<
       OBC.SimpleScene,
-      OBC.SimpleCamera,
+      OBC.OrthoPerspectiveCamera,
       OBC.SimpleRenderer
     >();
 
     world.scene = new OBC.SimpleScene(components);
     world.renderer = new OBC.SimpleRenderer(components, container);
-    world.camera = new OBC.SimpleCamera(components);
+    world.camera = new OBC.OrthoPerspectiveCamera(components);
 
     components.init();
 
@@ -37,18 +37,24 @@ function Index() {
 
     world.scene.three.background = null;
 
-    // grids
-    const grids = components.get(OBC.Grids);
-    const grid = grids.create(world);
-    console.log(grid);
-
     // cube
-    const material = new THREE.MeshLambertMaterial({ color: "#6528D7" });
-    const geometry = new THREE.BoxGeometry();
-    const cube = new THREE.Mesh(geometry, material);
+    let cubeGeometry = new THREE.BoxGeometry();
+    let cubeMaterial = new THREE.MeshStandardMaterial({ color: "#6528D7" });
+    let cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
     cube.position.set(0, 0.5, 0);
+
     world.scene.three.add(cube);
     world.meshes.add(cube);
+
+    // grids
+    let grids = components.get(OBC.Grids);
+    let grid = grids.create(world);
+    console.log(grid);
+
+    world.camera.projection.onChanged.add(() => {
+      const projection = world.camera.projection.current;
+      grid.fade = projection === "Perspective";
+    });
 
     // need to initialize the Raycaster for this world so that the position of the mouse is tracked from the very first moment we use the clipping planes.
     const casters = components.get(OBC.Raycasters);
@@ -167,6 +173,104 @@ function Index() {
          
           
         </bim-panel-section>
+        <bim-panel-section collapsed label="Camera">
+         
+        <bim-dropdown required label="Navigation mode" 
+          @change="${({ target }: { target: BUI.Dropdown }) => {
+            const selected = target.value[0] as OBC.NavModeID;
+
+            const { current } = world.camera.projection;
+            const isOrtho = current === "Orthographic";
+            const isFirstPerson = selected === "FirstPerson";
+            if (isOrtho && isFirstPerson) {
+              alert("First person is not compatible with ortho!");
+              target.value[0] = world.camera.mode.id;
+              return;
+            }
+            world.camera.set(selected);
+          }}">
+
+        <bim-option checked label="Orbit"></bim-option>
+        <bim-option label="FirstPerson"></bim-option>
+        <bim-option label="Plan"></bim-option>
+      </bim-dropdown>
+       
+    
+      <bim-dropdown required label="Camera projection" 
+          @change="${({ target }: { target: BUI.Dropdown }) => {
+            const selected = target.value[0] as OBC.CameraProjection;
+            const isOrtho = selected === "Orthographic";
+            const isFirstPerson = world.camera.mode.id === "FirstPerson";
+            if (isOrtho && isFirstPerson) {
+              alert("First person is not compatible with ortho!");
+              target.value[0] = world.camera.projection.current;
+              return;
+            }
+            world.camera.projection.set(selected);
+          }}">
+        <bim-option checked label="Perspective"></bim-option>
+        <bim-option label="Orthographic"></bim-option>
+      </bim-dropdown>
+
+      <bim-checkbox 
+        label="Allow user input" checked 
+        @change="${({ target }: { target: BUI.Checkbox }) => {
+          world.camera.setUserInput(target.checked);
+        }}">  
+      </bim-checkbox>  
+      
+      <bim-button 
+        label="Fit cube" 
+        @click="${() => {
+          world.camera.fit([cube]);
+        }}">  
+      </bim-button>
+
+      <bim-button 
+      label="Reset scene" 
+      @click="${async () => {
+        components.dispose();
+
+        components = new OBC.Components();
+        worlds = components.get(OBC.Worlds);
+
+        world = worlds.create<
+          OBC.SimpleScene,
+          OBC.OrthoPerspectiveCamera,
+          OBC.SimpleRenderer
+        >();
+
+        world.scene = new OBC.SimpleScene(components);
+        world.renderer = new OBC.SimpleRenderer(components, container);
+        world.camera = new OBC.OrthoPerspectiveCamera(components);
+
+        world.scene.setup();
+
+        await world.camera.controls.setLookAt(3, 3, 3, 0, 0, 0);
+
+        components.init();
+
+        world.scene.three.background = null;
+
+        cubeGeometry = new THREE.BoxGeometry();
+        cubeMaterial = new THREE.MeshStandardMaterial({ color: "#6528D7" });
+        cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.position.set(0, 0.5, 0);
+
+        world.scene.three.add(cube);
+        world.meshes.add(cube);
+
+        grids = components.get(OBC.Grids);
+        grid = grids.create(world);
+
+        world.camera.projection.onChanged.add(() => {
+          const projection = world.camera.projection.current;
+          grid.fade = projection === "Perspective";
+        });
+      }}">  
+    </bim-button>  
+
+    </bim-panel-section>
         </bim-panel>
         `;
     });
