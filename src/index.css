@@ -119,3 +119,9 @@
         right: 5px;
     }
 }
+
+.minimap {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+}
