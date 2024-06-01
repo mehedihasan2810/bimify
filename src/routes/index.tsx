@@ -39,9 +39,9 @@ function Index() {
       world.scene.three.background = null;
 
       // cube
-      // let cubeGeometry = new THREE.BoxGeometry();
-      // let cubeMaterial = new THREE.MeshStandardMaterial({ color: "#6528D7" });
-      // let cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      // const cubeGeometry = new THREE.BoxGeometry();
+      // const cubeMaterial = new THREE.MeshStandardMaterial({ color: "#6528D7" });
+      // const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
       // cube.position.set(0, 0.5, 0);
 
       // world.scene.three.add(cube);
@@ -57,16 +57,31 @@ function Index() {
         grid.fade = projection === "Perspective";
       });
 
-      let fragments = new OBC.FragmentsManager(components);
+      // let fragments = new OBC.FragmentsManager(components);
 
+      // let file = await fetch(
+      //   "https://thatopen.github.io/engine_components/resources/small.frag"
+      // );
+      // let dataBlob = await file.arrayBuffer();
+      // let buffer = new Uint8Array(dataBlob);
+      // let model = fragments.load(buffer);
+      // model.position.set(0, 1, 0);
+      // world.scene.three.add(model);
+      // // world.meshes.add(model.children)
+      // console.log(model)
+
+      let ifcLoader = components.get(OBC.IfcLoader);
+      await ifcLoader.setup();
       let file = await fetch(
-        "https://thatopen.github.io/engine_components/resources/small.frag"
+        "https://thatopen.github.io/engine_ui-components/resources/small.ifc"
       );
-      let dataBlob = await file.arrayBuffer();
-      let buffer = new Uint8Array(dataBlob);
-      let model = fragments.load(buffer);
+      let buffer = await file.arrayBuffer();
+      let typedArray = new Uint8Array(buffer);
+      let model = await ifcLoader.load(typedArray);
       model.position.set(0, 1, 0);
       world.scene.three.add(model);
+      // world.meshes.add(model)
+      console.log(model)
 
       // setup minimap
       const maps = new OBC.MiniMaps(components);
@@ -189,9 +204,9 @@ function Index() {
           <bim-button 
             label="Rotate cube" 
             @click="${() => {
-              model.rotation.x = 2 * Math.PI * Math.random();
-              model.rotation.y = 2 * Math.PI * Math.random();
-              model.rotation.z = 2 * Math.PI * Math.random();
+              // model.rotation.x = 2 * Math.PI * Math.random();
+              // model.rotation.y = 2 * Math.PI * Math.random();
+              // model.rotation.z = 2 * Math.PI * Math.random();
             }}">  
           </bim-button>
          
@@ -285,14 +300,14 @@ function Index() {
         // world.scene.three.add(cube);
         // world.meshes.add(cube);
 
-        fragments = new OBC.FragmentsManager(components);
-
+        ifcLoader = components.get(OBC.IfcLoader);
+        await ifcLoader.setup();
         file = await fetch(
-          "https://thatopen.github.io/engine_components/resources/small.frag"
+          "https://thatopen.github.io/engine_ui-components/resources/small.ifc"
         );
-        dataBlob = await file.arrayBuffer();
-        buffer = new Uint8Array(dataBlob);
-        model = fragments.load(buffer);
+        buffer = await file.arrayBuffer();
+        typedArray = new Uint8Array(buffer);
+        model = await ifcLoader.load(typedArray);
         model.position.set(0, 1, 0);
         world.scene.three.add(model);
 
