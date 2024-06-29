@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import * as THREE from "three";
 import * as BUI from "@thatopen/ui";
 import * as OBC from "@thatopen/components";
+import * as OBF from "@thatopen/components-front";
+import * as CUI from "@thatopen/ui-obc";
 import Stats from "stats.js";
 
 export const Route = createFileRoute("/")({
@@ -39,18 +41,18 @@ function Index() {
       world.scene.three.background = null;
 
       // cube
-      // const cubeGeometry = new THREE.BoxGeometry();
-      // const cubeMaterial = new THREE.MeshStandardMaterial({ color: "#6528D7" });
-      // const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-      // cube.position.set(0, 0.5, 0);
+      const cubeGeometry = new THREE.BoxGeometry();
+      const cubeMaterial = new THREE.MeshStandardMaterial({ color: "#6528D7" });
+      const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      cube.position.set(0, 0.5, 0);
 
-      // world.scene.three.add(cube);
-      // world.meshes.add(cube);
+      world.scene.three.add(cube);
+      world.meshes.add(cube);
 
       // grids
       let grids = components.get(OBC.Grids);
       let grid = grids.create(world);
-      console.log(grid);
+      // console.log(grid);
 
       world.camera.projection.onChanged.add(() => {
         const projection = world.camera.projection.current;
@@ -81,7 +83,30 @@ function Index() {
       model.position.set(0, 1, 0);
       world.scene.three.add(model);
       // world.meshes.add(model)
-      console.log(model)
+      console.log(model);
+
+      // const indexer = components.get(OBC.IfcRelationsIndexer);
+      // await indexer.process(model);
+
+      // const [propertiesTable, updatePropertiesTable] =
+      //   CUI.tables.elementProperties({
+      //     components,
+      //     fragmentIdMap: {},
+      //   });
+
+      // propertiesTable.preserveStructureOnFilter = true;
+      // propertiesTable.indentationInText = false;
+
+      // const highlighter = components.get(OBF.Highlighter);
+      // highlighter.setup({ world });
+
+      // highlighter.events.select.onHighlight.add((fragmentIdMap) => {
+      //   updatePropertiesTable({ fragmentIdMap });
+      // });
+
+      // highlighter.events.select.onClear.add(() =>
+      //   updatePropertiesTable({ fragmentIdMap: {} })
+      // );
 
       // setup minimap
       const maps = new OBC.MiniMaps(components);
@@ -103,7 +128,10 @@ function Index() {
 
       clipper.enabled = true;
 
-      container.ondblclick = () => clipper.create(world);
+      container.ondblclick = () => {
+        console.log("dbl click")
+        clipper.create(world)
+      };
 
       window.onkeydown = (event) => {
         if (event.code === "Delete" || event.code === "Backspace") {
